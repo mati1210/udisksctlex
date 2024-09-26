@@ -14,7 +14,7 @@ with open(sys.argv[1], "a+b") as fd:
     loop_object_path = manager.loop_setup(fd.fileno(), {})
 
 block = Block(loop_object_path)
-print(f"Loop file: {block.device}")
+print(f"Loop file: {str(block.device, encoding='utf-8', errors='backslashreplace')}")
 if block.id_usage == "crypto":
     is_crypto = True
     crypt = Encrypted(loop_object_path)
