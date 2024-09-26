@@ -1,50 +1,31 @@
 # SPDX-License-Identifier: MPL-2.0
-
-import sys
-import getpass
 import sdbus
+import pathlib
+import argparse
 from .dbus import *
 
-sdbus.set_default_bus(sdbus.sd_bus_open_system())
 
-is_crypto = False
-manager = Manager()
+def main():
+    sdbus.set_default_bus(sdbus.sd_bus_open_system())
 
-with open(sys.argv[1], "a+b") as fd:
-    loop_object_path = manager.loop_setup(fd.fileno(), {})
+    parser = argparse.ArgumentParser("udisksctlex")
+    subparsers = parser.add_subparsers(title="commands", dest="command")
 
-block = Block(loop_object_path)
-print(f"Loop file: {str(block.device, encoding='utf-8', errors='backslashreplace')}")
-if block.id_usage == "crypto":
-    is_crypto = True
-    crypt = Encrypted(loop_object_path)
-    while True:
-        try:
-            crypt_object_path = crypt.unlock(getpass.getpass(), {})
-            break
-        except sdbus.SdBusUnmappedMessageError as e:
-            print(f"Failed to unlock device! {e}")
-            pass
+    loop_setup = subparsers.add_parser("loop-mount")
+    loop_setup.add_argument(
+        "file",
+        help="sets-up a loop device, unlocks it, and mounts it",
+        type=pathlib.Path,
+    )
 
-    object_path = crypt_object_path
-else:
-    object_path = loop_object_path
+    args = parser.parse_args()
 
-fs = Filesystem(object_path)
-mount_path = fs.mount({})
-print(f"Mounted at {mount_path}.")
+    match args.command:
+        case "loop-mount":
+            from .loop_open import loop_open
 
-input("Enter to dismount.")
+            loop_open(args.file)
 
-print(f"Trying to unmount {mount_path}...", end="")
-while True:
-    try:
-        fs.unmount({})
-        break
-    except:
-        pass
-print("Unmounted.")
-if is_crypto:
-    crypt.lock({})
 
-Loop(loop_object_path).delete({})
+if __name__ == "__main__":
+    main()
