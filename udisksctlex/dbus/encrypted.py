@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MPL-2.0
-
+# doc: https://storaged.org/doc/udisks2-api/latest/gdbus-org.freedesktop.UDisks2.Encrypted.html
 import sdbus
 from . import SERVICE_NAME, Options
 
