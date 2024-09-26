@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import sdbus
+from .types import *
 
 SERVICE_NAME = "org.freedesktop.UDisks2"
-Options = dict[str, tuple[str, any]]
 
 from .block import Block
 from .manager import Manager
